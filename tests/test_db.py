@@ -69,3 +69,13 @@ def test_flavor_synced_flag_defaults_false_then_true(conn):
     db.mark_flavor_synced(conn, 1)
 
     assert db.is_flavor_synced(conn, 1) is True
+
+
+def test_game_sprites_synced_flag_defaults_false_then_true(conn):
+    db.upsert_core(conn, number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass"])
+
+    assert db.is_game_sprites_synced(conn, 1) is False
+
+    db.mark_game_sprites_synced(conn, 1)
+
+    assert db.is_game_sprites_synced(conn, 1) is True

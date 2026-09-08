@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS pokemon (
     generation INTEGER NOT NULL,
     height INTEGER NOT NULL,
     weight INTEGER NOT NULL,
-    flavor_synced INTEGER NOT NULL DEFAULT 0
+    flavor_synced INTEGER NOT NULL DEFAULT 0,
+    game_sprites_synced INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS pokemon_types (
@@ -40,7 +41,14 @@ def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
 
 def init_db(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    _ensure_column(conn, "pokemon", "game_sprites_synced", "INTEGER NOT NULL DEFAULT 0")
     conn.commit()
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, column_type: str) -> None:
+    existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column not in existing:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
 
 
 def upsert_core(
@@ -91,6 +99,16 @@ def mark_flavor_synced(conn: sqlite3.Connection, number: int) -> None:
 
 def is_flavor_synced(conn: sqlite3.Connection, number: int) -> bool:
     row = conn.execute("SELECT flavor_synced FROM pokemon WHERE number = ?", (number,)).fetchone()
+    return bool(row and row[0])
+
+
+def mark_game_sprites_synced(conn: sqlite3.Connection, number: int) -> None:
+    conn.execute("UPDATE pokemon SET game_sprites_synced = 1 WHERE number = ?", (number,))
+    conn.commit()
+
+
+def is_game_sprites_synced(conn: sqlite3.Connection, number: int) -> bool:
+    row = conn.execute("SELECT game_sprites_synced FROM pokemon WHERE number = ?", (number,)).fetchone()
     return bool(row and row[0])
 
 
