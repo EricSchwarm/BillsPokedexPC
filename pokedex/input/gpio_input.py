@@ -11,16 +11,16 @@ from gpiozero import Button as GPIOButton
 from config import (
     BUTTON_NEXT_PIN,
     BUTTON_PREV_PIN,
-    BUTTON_REFRESH_PIN,
+    BUTTON_RANDOM_PIN,
     BUTTON_VERSION_PIN,
 )
 from pokedex.input.base import Button, ButtonInput
 
 _PIN_BY_BUTTON = {
-    Button.PREV: BUTTON_PREV_PIN,
     Button.NEXT: BUTTON_NEXT_PIN,
+    Button.PREV: BUTTON_PREV_PIN,
+    Button.RANDOM: BUTTON_RANDOM_PIN,
     Button.VERSION: BUTTON_VERSION_PIN,
-    Button.REFRESH: BUTTON_REFRESH_PIN,
 }
 
 

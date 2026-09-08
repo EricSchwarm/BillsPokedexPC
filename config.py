@@ -12,8 +12,8 @@ FONT_PATH = BASE_DIR / "pokedex" / "assets" / "fonts" / "PressStart2P-Regular.tt
 DISPLAY_WIDTH = 264
 DISPLAY_HEIGHT = 176
 
-# Onboard buttons, BCM numbering.
-BUTTON_PREV_PIN = 5
-BUTTON_NEXT_PIN = 6
-BUTTON_VERSION_PIN = 13
-BUTTON_REFRESH_PIN = 19
+# Onboard buttons, BCM numbering: button 1/2/3/4 on the HAT.
+BUTTON_NEXT_PIN = 5
+BUTTON_PREV_PIN = 6
+BUTTON_RANDOM_PIN = 13
+BUTTON_VERSION_PIN = 19

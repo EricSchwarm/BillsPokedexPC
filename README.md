@@ -44,6 +44,21 @@ Use `--force` to re-fetch everything from scratch.
 
     pytest
 
+## Running the slideshow
+
+    python main.py
+
+Displays one Pokemon at a time. Buttons (BCM 5/6/13/19, HAT-labeled 1-4):
+
+- **Button 1** — next Pokemon
+- **Button 2** — previous Pokemon
+- **Button 3** — random Pokemon
+- **Button 4** — cycle the game version shown, among whichever of
+  Red/Blue, Yellow, Gold/Silver, and Crystal actually exist for that
+  Pokemon. Red/Blue always share identical text, so there's no ambiguity
+  there; Gold and Silver differ for every entry, and that stop shows
+  Gold's text.
+
 ## Deploying to the Pi
 
 Enable SPI via `raspi-config`, confirm the `pi` user is in the `spi`/`gpio`

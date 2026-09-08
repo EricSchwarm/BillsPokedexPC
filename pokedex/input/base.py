@@ -6,10 +6,10 @@ from typing import Callable
 
 
 class Button(Enum):
-    PREV = auto()
     NEXT = auto()
+    PREV = auto()
+    RANDOM = auto()
     VERSION = auto()
-    REFRESH = auto()
 
 
 class ButtonInput(ABC):

@@ -1,5 +1,6 @@
 """Main application state machine: Pokemon index + game-version navigation."""
 
+import random
 import sqlite3
 
 from pokedex import db
@@ -9,7 +10,18 @@ from pokedex.ui.layout import render_entry
 
 NATIONAL_DEX_START = 1
 NATIONAL_DEX_END = 251
-GAME_VERSIONS = ["red", "blue", "yellow", "gold", "silver", "crystal"]
+
+# Each tuple is one "stop" for the version button. A group is available if
+# any version in it has flavor text for the current Pokemon, and the first
+# available member is the one shown. Red/Blue always share identical text;
+# Gold/Silver do not (every entry differs) but are grouped as one stop here
+# anyway, showing Gold's text.
+GAME_GROUPS: list[tuple[str, ...]] = [
+    ("red", "blue"),
+    ("yellow",),
+    ("gold", "silver"),
+    ("crystal",),
+]
 
 
 class PokedexApp:
@@ -18,12 +30,12 @@ class PokedexApp:
         self._display = display
         self._input = button_input
         self._number = NATIONAL_DEX_START
-        self._version_index = 0
+        self._group_index = 0
 
-        self._input.on_press(Button.PREV, self._show_previous)
         self._input.on_press(Button.NEXT, self._show_next)
+        self._input.on_press(Button.PREV, self._show_previous)
+        self._input.on_press(Button.RANDOM, self._show_random)
         self._input.on_press(Button.VERSION, self._cycle_version)
-        self._input.on_press(Button.REFRESH, self._force_refresh)
 
     @property
     def current_number(self) -> int:
@@ -31,35 +43,45 @@ class PokedexApp:
 
     @property
     def current_version(self) -> str | None:
-        available = self._available_versions()
-        return available[self._version_index % len(available)] if available else None
+        available = self._available_groups()
+        if not available:
+            return None
+        group = available[self._group_index % len(available)]
+        return self._first_synced_version(group)
 
     def start(self) -> None:
         self._render()
 
-    def _show_previous(self) -> None:
-        self._number = self._number - 1 if self._number > NATIONAL_DEX_START else NATIONAL_DEX_END
-        self._version_index = 0
-        self._render()
-
     def _show_next(self) -> None:
         self._number = self._number + 1 if self._number < NATIONAL_DEX_END else NATIONAL_DEX_START
-        self._version_index = 0
+        self._group_index = 0
+        self._render()
+
+    def _show_previous(self) -> None:
+        self._number = self._number - 1 if self._number > NATIONAL_DEX_START else NATIONAL_DEX_END
+        self._group_index = 0
+        self._render()
+
+    def _show_random(self) -> None:
+        self._number = random.randint(NATIONAL_DEX_START, NATIONAL_DEX_END)
+        self._group_index = 0
         self._render()
 
     def _cycle_version(self) -> None:
-        available = self._available_versions()
+        available = self._available_groups()
         if not available:
             return
-        self._version_index = (self._version_index + 1) % len(available)
+        self._group_index = (self._group_index + 1) % len(available)
         self._render()
 
-    def _force_refresh(self) -> None:
-        self._display.clear()
-        self._render()
+    def _available_groups(self) -> list[tuple[str, ...]]:
+        return [group for group in GAME_GROUPS if self._first_synced_version(group) is not None]
 
-    def _available_versions(self) -> list[str]:
-        return [v for v in GAME_VERSIONS if db.get_flavor_text(self._conn, self._number, v) is not None]
+    def _first_synced_version(self, group: tuple[str, ...]) -> str | None:
+        for version in group:
+            if db.get_flavor_text(self._conn, self._number, version) is not None:
+                return version
+        return None
 
     def _render(self) -> None:
         pokemon = db.get_by_number(self._conn, self._number)
