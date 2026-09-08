@@ -2,11 +2,7 @@
 
 from config import DISPLAY_HEIGHT, DISPLAY_WIDTH
 from pokedex.models import Pokemon
-from pokedex.ui.layout import (
-    _decimeters_to_feet_inches,
-    _hectograms_to_pounds,
-    render_entry,
-)
+from pokedex.ui.layout import _load_sprite, render_entry
 
 BULBASAUR = Pokemon(number=1, name="bulbasaur", generation=1, height=7, weight=69, genus="Seed Pokemon", types=["grass", "poison"])
 CHIKORITA = Pokemon(number=152, name="chikorita", generation=2, height=9, weight=64, genus="Leaf Pokemon", types=["grass"])
@@ -32,9 +28,25 @@ def test_render_entry_handles_missing_sprite_file():
     assert image.size == (DISPLAY_WIDTH, DISPLAY_HEIGHT)
 
 
-def test_decimeters_to_feet_inches_matches_official_bulbasaur_height():
-    assert _decimeters_to_feet_inches(7) == (2, 4)
+def test_render_entry_handles_no_version_selected():
+    image = render_entry(BULBASAUR, "A strange seed was planted on its back at birth.", "")
+
+    assert image.size == (DISPLAY_WIDTH, DISPLAY_HEIGHT)
 
 
-def test_hectograms_to_pounds_matches_official_bulbasaur_weight():
-    assert round(_hectograms_to_pounds(69), 1) == 15.2
+def test_load_sprite_prefers_game_specific_sprite_and_upscales_crisply():
+    sprite = _load_sprite(1, "red")
+
+    assert sprite is not None
+    assert sprite.size == (80, 80)  # native in-game sprite is 40x40, upscaled 2x
+
+
+def test_load_sprite_falls_back_to_official_artwork_when_game_sprite_missing():
+    sprite = _load_sprite(1, "nonexistent-version")
+
+    assert sprite is not None
+    assert sprite.size[0] <= 80 and sprite.size[1] <= 80
+
+
+def test_load_sprite_returns_none_when_nothing_available():
+    assert _load_sprite(9999, "red") is None
