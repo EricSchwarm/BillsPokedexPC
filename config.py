@@ -5,6 +5,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "pokedex.db"
 SPRITES_DIR = BASE_DIR / "sprites"
+EINK_SPRITES_DIR = SPRITES_DIR / "eink"
 FONT_PATH = BASE_DIR / "pokedex" / "assets" / "fonts" / "PressStart2P-Regular.ttf"
 
 # Waveshare 2.7" e-ink HAT, landscape orientation.

@@ -7,10 +7,10 @@ the bottom.
 
 from PIL import Image, ImageDraw, ImageFont
 
-from config import DISPLAY_HEIGHT, DISPLAY_WIDTH, FONT_PATH, SPRITES_DIR
+from config import DISPLAY_HEIGHT, DISPLAY_WIDTH, EINK_SPRITES_DIR, FONT_PATH, SPRITES_DIR
 from pokedex.models import Pokemon
+from pokedex.sprite_convert import flatten_to_1bit
 
-GAME_SPRITE_SCALE = 2  # native in-game sprites are 40x40; nearest-neighbor upscale keeps pixel art crisp
 ARTWORK_SPRITE_BOX = (80, 80)
 SPRITE_TOP = 24
 DESCRIPTION_TOP = 112
@@ -38,24 +38,19 @@ def render_entry(pokemon: Pokemon, flavor_text: str, version: str) -> Image.Imag
 
 
 def _load_sprite(number: int, version: str) -> Image.Image | None:
-    game_path = SPRITES_DIR / "games" / version / f"{number:03d}.png" if version else None
-    if game_path is not None and game_path.exists():
-        sprite = Image.open(game_path).convert("RGBA")
-        size = (sprite.width * GAME_SPRITE_SCALE, sprite.height * GAME_SPRITE_SCALE)
-        return _flatten_to_1bit(sprite.resize(size, Image.NEAREST))
+    eink_path = EINK_SPRITES_DIR / version / f"{number:03d}.png" if version else None
+    if eink_path is not None and eink_path.exists():
+        return Image.open(eink_path)
 
+    # Rare fallback (e.g. a version whose sprite hasn't been pre-converted yet):
+    # build a 1-bit sprite on the fly from the official artwork.
     artwork_path = SPRITES_DIR / f"{number:03d}.png"
     if artwork_path.exists():
         sprite = Image.open(artwork_path).convert("RGBA")
         sprite.thumbnail(ARTWORK_SPRITE_BOX, Image.LANCZOS)
-        return _flatten_to_1bit(sprite)
+        return flatten_to_1bit(sprite)
 
     return None
-
-
-def _flatten_to_1bit(sprite: Image.Image) -> Image.Image:
-    flattened = Image.alpha_composite(Image.new("RGBA", sprite.size, (255, 255, 255, 255)), sprite)
-    return flattened.convert("L").convert("1", dither=Image.FLOYDSTEINBERG)
 
 
 def _draw_wrapped_text(draw: ImageDraw.ImageDraw, text: str, position: tuple[int, int], max_width: int, font) -> None:
