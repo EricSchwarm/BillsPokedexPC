@@ -123,6 +123,10 @@ def sync_game_sprites(session: requests.Session, conn, number: int, pokemon_data
 
 def sync_flavor_text(session: requests.Session, conn, number: int) -> None:
     data = session.get(f"{API_BASE}/pokemon-species/{number}", timeout=15).json()
+
+    genus = next((g["genus"] for g in data["genera"] if g["language"]["name"] == "en"), "")
+    db.set_genus(conn, number, genus)
+
     seen = set()
     for entry in data["flavor_text_entries"]:
         version = entry["version"]["name"]
@@ -130,7 +134,8 @@ def sync_flavor_text(session: requests.Session, conn, number: int) -> None:
         if language != "en" or version not in VERSIONS or version in seen:
             continue  # PokeAPI has duplicate entries per version; first one wins
         seen.add(version)
-        db.upsert_flavor_text(conn, number, version, clean_flavor_text(entry["flavor_text"]))
+        raw_text = entry["flavor_text"]
+        db.upsert_flavor_text(conn, number, version, clean_flavor_text(raw_text), raw_text)
     db.mark_flavor_synced(conn, number)
 
 

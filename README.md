@@ -24,7 +24,11 @@ Offline Pokedex slideshow for a Raspberry Pi 3B+ with a Waveshare 2.7" e-ink HAT
 
 Populates, per Pokemon (national dex #1-251, Gen 1 + Gen 2):
 
-- `pokedex.db` — name, types, height/weight, English flavor text per game version.
+- `pokedex.db` — name, types, height/weight, genus (e.g. "Seed Pokemon"), and
+  English flavor text per game version, stored two ways: `text` is
+  whitespace-collapsed for wrapping to the display width, `raw_text` preserves
+  the original in-game line breaks (`\n`) and page breaks (`\x0c`, the
+  Gen I/II games' "press a button for more" prompt).
 - `sprites/<number>.png` — official artwork.
 - `sprites/games/<version>/<number>.png` — the original in-game sprite for each
   of the 6 games (red, blue, yellow, gold, silver, crystal). Red/Blue/Yellow

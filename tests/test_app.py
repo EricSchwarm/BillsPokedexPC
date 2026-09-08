@@ -48,16 +48,16 @@ def conn():
     connection = sqlite3.connect(":memory:")
     db.init_db(connection)
     db.upsert_core(connection, number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
-    db.upsert_flavor_text(connection, 1, "red", "Bulbasaur red text.")
-    db.upsert_flavor_text(connection, 1, "blue", "Bulbasaur blue text.")
+    db.upsert_flavor_text(connection, 1, "red", "Bulbasaur red text.", "Bulbasaur\nred text.")
+    db.upsert_flavor_text(connection, 1, "blue", "Bulbasaur blue text.", "Bulbasaur\nblue text.")
     db.mark_flavor_synced(connection, 1)
 
     db.upsert_core(connection, number=2, name="ivysaur", generation=1, height=10, weight=130, types=["grass", "poison"])
-    db.upsert_flavor_text(connection, 2, "yellow", "Ivysaur yellow text.")
+    db.upsert_flavor_text(connection, 2, "yellow", "Ivysaur yellow text.", "Ivysaur\nyellow text.")
     db.mark_flavor_synced(connection, 2)
 
     db.upsert_core(connection, number=152, name="chikorita", generation=2, height=9, weight=64, types=["grass"])
-    db.upsert_flavor_text(connection, 152, "gold", "Chikorita gold text.")
+    db.upsert_flavor_text(connection, 152, "gold", "Chikorita gold text.", "Chikorita\ngold text.")
     db.mark_flavor_synced(connection, 152)
 
     db.upsert_core(connection, number=NATIONAL_DEX_END, name="celebi", generation=2, height=6, weight=50, types=["psychic", "grass"])

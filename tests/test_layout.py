@@ -8,9 +8,9 @@ from pokedex.ui.layout import (
     render_entry,
 )
 
-BULBASAUR = Pokemon(number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
-CHIKORITA = Pokemon(number=152, name="chikorita", generation=2, height=9, weight=64, types=["grass"])
-NO_SPRITE = Pokemon(number=9999, name="missingno", generation=1, height=10, weight=10, types=["normal"])
+BULBASAUR = Pokemon(number=1, name="bulbasaur", generation=1, height=7, weight=69, genus="Seed Pokemon", types=["grass", "poison"])
+CHIKORITA = Pokemon(number=152, name="chikorita", generation=2, height=9, weight=64, genus="Leaf Pokemon", types=["grass"])
+NO_SPRITE = Pokemon(number=9999, name="missingno", generation=1, height=10, weight=10, genus="", types=["normal"])
 
 
 def test_render_entry_produces_correct_size_and_mode():

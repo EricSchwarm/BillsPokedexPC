@@ -10,4 +10,5 @@ class Pokemon:
     generation: int
     height: int  # decimeters, per PokeAPI
     weight: int  # hectograms, per PokeAPI
+    genus: str  # e.g. "Seed Pokemon"
     types: list[str]

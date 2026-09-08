@@ -34,16 +34,37 @@ def test_get_by_number_missing_returns_none(conn):
 
 def test_get_flavor_text_returns_text_for_version(conn):
     db.upsert_core(conn, number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
-    db.upsert_flavor_text(conn, 1, "red", "A strange seed was planted on its back at birth.")
+    db.upsert_flavor_text(conn, 1, "red", "cleaned text", "raw\ntext")
 
-    assert db.get_flavor_text(conn, 1, "red") == "A strange seed was planted on its back at birth."
+    assert db.get_flavor_text(conn, 1, "red") == "cleaned text"
 
 
 def test_get_flavor_text_missing_version_returns_none(conn):
     db.upsert_core(conn, number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
-    db.upsert_flavor_text(conn, 1, "red", "Some text.")
+    db.upsert_flavor_text(conn, 1, "red", "cleaned text", "raw\ntext")
 
     assert db.get_flavor_text(conn, 1, "gold") is None
+
+
+def test_get_raw_flavor_text_preserves_original_formatting(conn):
+    db.upsert_core(conn, number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
+    db.upsert_flavor_text(conn, 1, "red", "cleaned text", "line one\nline two\x0cpage two")
+
+    assert db.get_raw_flavor_text(conn, 1, "red") == "line one\nline two\x0cpage two"
+
+
+def test_get_raw_flavor_text_missing_version_returns_none(conn):
+    db.upsert_core(conn, number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
+
+    assert db.get_raw_flavor_text(conn, 1, "gold") is None
+
+
+def test_set_genus_updates_pokemon(conn):
+    db.upsert_core(conn, number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
+
+    db.set_genus(conn, 1, "Seed Pokemon")
+
+    assert db.get_by_number(conn, 1).genus == "Seed Pokemon"
 
 
 def test_list_by_generation_returns_only_matching_pokemon_sorted(conn):

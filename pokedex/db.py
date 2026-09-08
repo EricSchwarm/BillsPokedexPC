@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS pokemon (
     generation INTEGER NOT NULL,
     height INTEGER NOT NULL,
     weight INTEGER NOT NULL,
+    genus TEXT NOT NULL DEFAULT '',
     flavor_synced INTEGER NOT NULL DEFAULT 0,
     game_sprites_synced INTEGER NOT NULL DEFAULT 0
 );
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS flavor_text (
     number INTEGER NOT NULL REFERENCES pokemon(number),
     version TEXT NOT NULL,
     text TEXT NOT NULL,
+    raw_text TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (number, version)
 );
 """
@@ -42,6 +44,8 @@ def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
 def init_db(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
     _ensure_column(conn, "pokemon", "game_sprites_synced", "INTEGER NOT NULL DEFAULT 0")
+    _ensure_column(conn, "pokemon", "genus", "TEXT NOT NULL DEFAULT ''")
+    _ensure_column(conn, "flavor_text", "raw_text", "TEXT NOT NULL DEFAULT ''")
     conn.commit()
 
 
@@ -80,15 +84,22 @@ def upsert_core(
     conn.commit()
 
 
-def upsert_flavor_text(conn: sqlite3.Connection, number: int, version: str, text: str) -> None:
+def upsert_flavor_text(conn: sqlite3.Connection, number: int, version: str, text: str, raw_text: str) -> None:
     conn.execute(
         """
-        INSERT INTO flavor_text (number, version, text)
-        VALUES (?, ?, ?)
-        ON CONFLICT(number, version) DO UPDATE SET text = excluded.text
+        INSERT INTO flavor_text (number, version, text, raw_text)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(number, version) DO UPDATE SET
+            text = excluded.text,
+            raw_text = excluded.raw_text
         """,
-        (number, version, text),
+        (number, version, text, raw_text),
     )
+    conn.commit()
+
+
+def set_genus(conn: sqlite3.Connection, number: int, genus: str) -> None:
+    conn.execute("UPDATE pokemon SET genus = ? WHERE number = ?", (genus, number))
     conn.commit()
 
 
@@ -114,7 +125,7 @@ def is_game_sprites_synced(conn: sqlite3.Connection, number: int) -> bool:
 
 def get_by_number(conn: sqlite3.Connection, number: int) -> Pokemon | None:
     row = conn.execute(
-        "SELECT number, name, generation, height, weight FROM pokemon WHERE number = ?",
+        "SELECT number, name, generation, height, weight, genus FROM pokemon WHERE number = ?",
         (number,),
     ).fetchone()
     if row is None:
@@ -132,6 +143,7 @@ def get_by_number(conn: sqlite3.Connection, number: int) -> Pokemon | None:
         generation=row[2],
         height=row[3],
         weight=row[4],
+        genus=row[5],
         types=types,
     )
 
@@ -139,6 +151,16 @@ def get_by_number(conn: sqlite3.Connection, number: int) -> Pokemon | None:
 def get_flavor_text(conn: sqlite3.Connection, number: int, version: str) -> str | None:
     row = conn.execute(
         "SELECT text FROM flavor_text WHERE number = ? AND version = ?",
+        (number, version),
+    ).fetchone()
+    return row[0] if row else None
+
+
+def get_raw_flavor_text(conn: sqlite3.Connection, number: int, version: str) -> str | None:
+    """Returns the flavor text with its original in-game line breaks (\\n) and
+    page breaks (\\x0c, the form-feed the Gen I/II games used between screens)."""
+    row = conn.execute(
+        "SELECT raw_text FROM flavor_text WHERE number = ? AND version = ?",
         (number, version),
     ).fetchone()
     return row[0] if row else None
