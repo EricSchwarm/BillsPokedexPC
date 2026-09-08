@@ -1,0 +1,5 @@
+# Pi-only: needed by pokedex/display/waveshare_driver.py and pokedex/input/gpio_input.py.
+# Not installable/importable on Windows - install this only on the Raspberry Pi.
+gpiozero==2.0.1
+lgpio==0.2.2.0
+spidev==3.6

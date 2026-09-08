@@ -1,0 +1,14 @@
+[Unit]
+Description=Bill's Pokedex e-ink slideshow
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/Bills_Pokedex_PC
+ExecStart=/usr/bin/python3 main.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

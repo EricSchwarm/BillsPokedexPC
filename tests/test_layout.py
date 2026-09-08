@@ -1,0 +1,40 @@
+"""Tests for pokedex.ui.layout rendering."""
+
+from config import DISPLAY_HEIGHT, DISPLAY_WIDTH
+from pokedex.models import Pokemon
+from pokedex.ui.layout import (
+    _decimeters_to_feet_inches,
+    _hectograms_to_pounds,
+    render_entry,
+)
+
+BULBASAUR = Pokemon(number=1, name="bulbasaur", generation=1, height=7, weight=69, types=["grass", "poison"])
+CHIKORITA = Pokemon(number=152, name="chikorita", generation=2, height=9, weight=64, types=["grass"])
+NO_SPRITE = Pokemon(number=9999, name="missingno", generation=1, height=10, weight=10, types=["normal"])
+
+
+def test_render_entry_produces_correct_size_and_mode():
+    image = render_entry(BULBASAUR, "A strange seed was planted on its back at birth.", "red")
+
+    assert image.size == (DISPLAY_WIDTH, DISPLAY_HEIGHT)
+    assert image.mode == "1"
+
+
+def test_render_entry_handles_single_type_pokemon():
+    image = render_entry(CHIKORITA, "A friendly leaf sprouts from its head.", "gold")
+
+    assert image.size == (DISPLAY_WIDTH, DISPLAY_HEIGHT)
+
+
+def test_render_entry_handles_missing_sprite_file():
+    image = render_entry(NO_SPRITE, "No data.", "red")
+
+    assert image.size == (DISPLAY_WIDTH, DISPLAY_HEIGHT)
+
+
+def test_decimeters_to_feet_inches_matches_official_bulbasaur_height():
+    assert _decimeters_to_feet_inches(7) == (2, 4)
+
+
+def test_hectograms_to_pounds_matches_official_bulbasaur_weight():
+    assert round(_hectograms_to_pounds(69), 1) == 15.2
