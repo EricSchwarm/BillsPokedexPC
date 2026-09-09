@@ -6,7 +6,7 @@ Offline Pokedex slideshow for a Raspberry Pi 3B+ with a Waveshare 2.7" e-ink HAT
 ## Layout
 
 - `pokedex/db.py`, `pokedex/models.py`, `pokedex/fetch.py` — offline SQLite dataset and its downloader.
-- `pokedex/display/` — `DisplayDriver` interface plus the Waveshare epd2in7_V2 wrapper (Pi-only; vendored driver in `display/vendor/`).
+- `pokedex/display/` — `DisplayDriver` interface plus the Waveshare epd2in7 (V1) wrapper (Pi-only; vendored driver in `display/vendor/`).
 - `pokedex/input/` — `ButtonInput` interface plus the gpiozero implementation for the onboard buttons (Pi-only).
 - `pokedex/ui/layout.py` — renders a dex entry to a 264x176 1-bit image.
 - `pokedex/app.py` / `main.py` — state machine and entry point wiring it all together.
@@ -65,5 +65,9 @@ Enable SPI via `raspi-config`, confirm the `pi` user is in the `spi`/`gpio`
 groups, `git pull` this repo, install `requirements.txt` +
 `requirements-hardware.txt`, then install `systemd/pokedex.service`.
 
-If your HAT is the older V1 panel revision, swap the import in
-`pokedex/display/waveshare_driver.py` from `epd2in7_V2` to `epd2in7`.
+This is set up for the older V1 panel revision. If you ever swap in a newer
+V2 HAT, swap the import in `pokedex/display/waveshare_driver.py` from
+`epd2in7` to `epd2in7_V2` — using the wrong one hangs forever on the very
+first busy-wait (V1 and V2 use inverted BUSY-pin polarity) rather than
+failing loudly, so if a fresh HAT hangs on startup, this is the first thing
+to check.
