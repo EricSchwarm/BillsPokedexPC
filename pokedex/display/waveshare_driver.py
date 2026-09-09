@@ -22,11 +22,13 @@ class WaveshareDriver(DisplayDriver):
 
     def draw(self, image: Image.Image) -> None:
         # The HAT is mounted in portrait; rotate the 264x176 landscape canvas
-        # to match. ROTATE_270 (90 clockwise) landed 180 degrees off in
-        # practice, since it also switches which orientation branch
-        # getbuffer() takes internally, so this direction is empirically
-        # correct rather than derived from the panel's raw pixel geometry.
-        rotated = image.transpose(Image.ROTATE_90)
+        # to match. Empirically tuning this: ROTATE_90/ROTATE_270 change the
+        # image's dimensions (264x176 -> 176x264), which switches which
+        # orientation branch getbuffer() takes internally, so the resulting
+        # rotation direction doesn't follow simply from the panel's raw pixel
+        # geometry. ROTATE_180 keeps the same 264x176 shape, staying on
+        # getbuffer()'s other branch instead.
+        rotated = image.transpose(Image.ROTATE_180)
         self._epd.display(self._epd.getbuffer(rotated))
 
     def clear(self) -> None:
