@@ -22,8 +22,11 @@ class WaveshareDriver(DisplayDriver):
 
     def draw(self, image: Image.Image) -> None:
         # The HAT is mounted in portrait; rotate the 264x176 landscape canvas
-        # 90 degrees clockwise to match.
-        rotated = image.transpose(Image.ROTATE_270)
+        # to match. ROTATE_270 (90 clockwise) landed 180 degrees off in
+        # practice, since it also switches which orientation branch
+        # getbuffer() takes internally, so this direction is empirically
+        # correct rather than derived from the panel's raw pixel geometry.
+        rotated = image.transpose(Image.ROTATE_90)
         self._epd.display(self._epd.getbuffer(rotated))
 
     def clear(self) -> None:
