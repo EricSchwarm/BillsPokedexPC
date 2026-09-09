@@ -12,14 +12,21 @@ from config import DISPLAY_HEIGHT, DISPLAY_WIDTH, EINK_SPRITES_DIR, FONT_PATH, S
 from pokedex.models import Pokemon
 from pokedex.sprite_convert import flatten_to_1bit
 
-ARTWORK_SPRITE_BOX = (120, 120)
-SPRITE_TOP = 26
+ARTWORK_SPRITE_BOX = (160, 160)
+SPRITE_TOP = 20  # just clears the 12pt header, which ends around y=16
 BOTTOM_MARGIN = 4
 FOOTER_GAP = 2
 POKEBALL_DIAMETER = 140
 
+BOX_MARGIN = 4  # horizontal distance from the screen edges to the text box
+BOX_PADDING = 4  # distance from the box border to the text inside it
+BOX_BORDER_GAP = 2  # gap between the double border's outer and inner lines
+
 _TITLE_FONT = ImageFont.truetype(str(FONT_PATH), 12)
-_BODY_FONT = ImageFont.truetype(str(FONT_PATH), 8)
+# 6pt rather than 8pt: verified against every stored flavor text that this is
+# the largest size that never overlaps the sprite at its current size/position
+# for the longest entries (worst case needs 5 wrapped lines at this width).
+_BODY_FONT = ImageFont.truetype(str(FONT_PATH), 6)
 
 
 def render_entry(pokemon: Pokemon, flavor_text: str, version: str) -> Image.Image:
@@ -36,14 +43,13 @@ def render_entry(pokemon: Pokemon, flavor_text: str, version: str) -> Image.Imag
         image.paste(sprite, (x, SPRITE_TOP))
 
     footer_height = _line_height(draw, _BODY_FONT) if version else 0
-    description_bottom = DISPLAY_HEIGHT - BOTTOM_MARGIN
+    box_bottom = DISPLAY_HEIGHT - BOTTOM_MARGIN
     if version:
-        description_bottom -= footer_height + FOOTER_GAP
+        box_bottom -= footer_height + FOOTER_GAP
 
-    # Anchored to the bottom of its own space (rather than a fixed offset
-    # below the sprite) so it stays clear of the sprite regardless of how
-    # many lines it needs, and sits low on the display as intended.
-    _draw_wrapped_text_bottom_anchored(draw, flavor_text, DISPLAY_WIDTH - 8, _BODY_FONT, description_bottom)
+    text_max_width = DISPLAY_WIDTH - 2 * (BOX_MARGIN + BOX_PADDING)
+    lines = _wrap_lines(draw, flavor_text, text_max_width, _BODY_FONT)
+    _draw_text_box(draw, lines, _BODY_FONT, box_bottom)
 
     if version:
         label = f"{version.upper()} VERSION"
@@ -94,7 +100,7 @@ def _load_sprite(number: int, version: str) -> Image.Image | None:
     return None
 
 
-def _draw_wrapped_text_bottom_anchored(draw: ImageDraw.ImageDraw, text: str, max_width: int, font, bottom: int) -> None:
+def _wrap_lines(draw: ImageDraw.ImageDraw, text: str, max_width: int, font) -> list[str]:
     lines = []
     current = ""
     for word in text.split():
@@ -106,11 +112,24 @@ def _draw_wrapped_text_bottom_anchored(draw: ImageDraw.ImageDraw, text: str, max
             current = word
     if current:
         lines.append(current)
+    return lines
 
+
+def _draw_text_box(draw: ImageDraw.ImageDraw, lines: list[str], font, bottom: int) -> None:
+    """Draws a double-bordered box (as in the games' dialogue text boxes),
+    bottom-anchored and horizontally centered, sized to fit the given lines."""
     line_height = _line_height(draw, font)
-    y = bottom - line_height * len(lines)
+    box_height = line_height * len(lines) + 2 * BOX_PADDING
+    left, right = BOX_MARGIN, DISPLAY_WIDTH - BOX_MARGIN
+    top = bottom - box_height
+
+    draw.rectangle((left, top, right, bottom), outline=0, fill=1, width=2)
+    gap = BOX_BORDER_GAP
+    draw.rectangle((left + gap, top + gap, right - gap, bottom - gap), outline=0, width=1)
+
+    y = top + BOX_PADDING
     for line in lines:
-        draw.text((4, y), line, font=font, fill=0)
+        draw.text((left + BOX_PADDING, y), line, font=font, fill=0)
         y += line_height
 
 

@@ -2,7 +2,7 @@
 
 from PIL import Image
 
-GAME_SPRITE_SCALE = 3  # native in-game sprites are 40x40; nearest-neighbor upscale keeps pixel art crisp
+GAME_SPRITE_SCALE = 4  # native in-game sprites are 40x40; nearest-neighbor upscale keeps pixel art crisp
 
 
 def upscale_game_sprite(sprite: Image.Image) -> Image.Image:
