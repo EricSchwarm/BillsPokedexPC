@@ -74,7 +74,12 @@ def build_session() -> requests.Session:
 
 
 def clean_flavor_text(raw: str) -> str:
-    return re.sub(r"\s+", " ", raw.replace("\f", " ")).strip()
+    # Some entries encode the original game's line-wrap hyphenation as a
+    # literal soft hyphen (U+00AD) right before the line break; drop it and
+    # any adjacent whitespace so the word rejoins cleanly instead of leaking
+    # through as e.g. "heav\xad iest".
+    dehyphenated = re.sub(r"\s*\xad\s*", "", raw)
+    return re.sub(r"\s+", " ", dehyphenated.replace("\f", " ")).strip()
 
 
 def download_sprite(session: requests.Session, url: str, dest: Path) -> None:
