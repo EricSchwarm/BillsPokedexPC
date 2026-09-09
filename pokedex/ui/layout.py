@@ -16,7 +16,7 @@ ARTWORK_SPRITE_BOX = (132, 132)  # matches GAME_SPRITE_TARGET_WIDTH: 75% of the 
 SPRITE_TOP = 20  # just clears the 12pt header, which ends around y=16
 BOTTOM_MARGIN = 4  # only used when there's no version footer to anchor against
 FOOTER_BOTTOM_MARGIN = 1  # the version tag sits flush at the very bottom of the screen
-FOOTER_GAP = 2
+FOOTER_GAP = 10  # one line-height of blank space between the text box and the version tag
 POKEBALL_DIAMETER = 140
 
 BOX_MARGIN = 16  # horizontal distance from the screen edges to the text box
