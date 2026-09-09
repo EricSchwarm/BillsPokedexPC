@@ -36,7 +36,9 @@ CREATE TABLE IF NOT EXISTS flavor_text (
 
 
 def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
-    conn = sqlite3.connect(db_path)
+    # check_same_thread=False: gpiozero button callbacks fire on its own
+    # background thread, not the thread that opened this connection.
+    conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
