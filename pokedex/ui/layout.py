@@ -19,9 +19,9 @@ FOOTER_BOTTOM_MARGIN = 1  # the version tag sits flush at the very bottom of the
 FOOTER_GAP = 10  # one line-height of blank space between the text box and the version tag
 POKEBALL_DIAMETER = 140
 
-BOX_MARGIN = 16  # horizontal distance from the screen edges to the text box
-BOX_PADDING = 4  # distance from the box border to the text inside it
-BOX_BORDER_GAP = 2  # gap between the double border's outer and inner lines
+BOX_MARGIN = 8  # horizontal distance from the screen edges to the text box
+BOX_PADDING = 6  # distance from the box border to the text inside it
+BOX_BORDER_WIDTH = 3  # a single, bold border line rather than the games' double-lined box
 
 _TITLE_FONT = ImageFont.truetype(str(FONT_PATH), 12)
 # 7pt rather than 8pt: verified against every stored flavor text that this is
@@ -118,16 +118,14 @@ def _wrap_lines(draw: ImageDraw.ImageDraw, text: str, max_width: int, font) -> l
 
 
 def _draw_text_box(draw: ImageDraw.ImageDraw, lines: list[str], font, bottom: int) -> None:
-    """Draws a double-bordered box (as in the games' dialogue text boxes),
+    """Draws a bordered box (as in the games' dialogue text boxes),
     bottom-anchored and horizontally centered, sized to fit the given lines."""
     line_height = _line_height(draw, font)
     box_height = line_height * len(lines) + 2 * BOX_PADDING
     left, right = BOX_MARGIN, DISPLAY_WIDTH - BOX_MARGIN
     top = bottom - box_height
 
-    draw.rectangle((left, top, right, bottom), outline=0, fill=1, width=2)
-    gap = BOX_BORDER_GAP
-    draw.rectangle((left + gap, top + gap, right - gap, bottom - gap), outline=0, width=1)
+    draw.rectangle((left, top, right, bottom), outline=0, fill=1, width=BOX_BORDER_WIDTH)
 
     y = top + BOX_PADDING
     for line in lines:
