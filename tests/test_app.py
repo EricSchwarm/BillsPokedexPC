@@ -12,6 +12,7 @@ from pokedex import db
 from pokedex.app import NATIONAL_DEX_END, NATIONAL_DEX_START, PokedexApp
 from pokedex.display.base import DisplayDriver
 from pokedex.input.base import Button, ButtonInput
+from pokedex.ui.layout import render_home_screen
 
 
 class FakeDisplay(DisplayDriver):
@@ -75,10 +76,12 @@ def conn():
     connection.close()
 
 
-def make_app(conn):
+def make_app(conn, skip_home=True):
     display = FakeDisplay()
     button_input = FakeButtonInput()
     app = PokedexApp(conn, display, button_input)
+    if skip_home:
+        app._showing_home = False
     return app, display, button_input
 
 
@@ -170,3 +173,33 @@ def test_changing_pokemon_resets_version_to_first_available(conn):
 
     assert app.current_number == 2
     assert app.current_version == "yellow"
+
+
+def test_start_shows_home_screen(conn):
+    app, display, _ = make_app(conn, skip_home=False)
+
+    app.start()
+
+    assert len(display.frames) == 1
+    assert list(display.frames[0].getdata()) == list(render_home_screen().getdata())
+
+
+def test_first_button_press_dismisses_home_without_performing_its_action(conn):
+    app, display, buttons = make_app(conn, skip_home=False)
+    app.start()
+
+    buttons.press(Button.NEXT)
+
+    assert app.current_number == NATIONAL_DEX_START  # consumed by dismissing home, not advanced
+    assert len(display.frames) == 2
+    assert list(display.frames[1].getdata()) != list(render_home_screen().getdata())
+
+
+def test_second_button_press_behaves_normally_after_home_dismissed(conn):
+    app, display, buttons = make_app(conn, skip_home=False)
+    app.start()
+    buttons.press(Button.NEXT)  # dismisses home
+
+    buttons.press(Button.NEXT)  # now a real "next"
+
+    assert app.current_number == 2

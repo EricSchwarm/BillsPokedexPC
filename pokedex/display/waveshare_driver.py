@@ -21,7 +21,10 @@ class WaveshareDriver(DisplayDriver):
         self._epd.Clear()
 
     def draw(self, image: Image.Image) -> None:
-        self._epd.display(self._epd.getbuffer(image))
+        # The HAT is mounted in portrait; rotate the 264x176 landscape canvas
+        # 90 degrees clockwise to match.
+        rotated = image.transpose(Image.ROTATE_270)
+        self._epd.display(self._epd.getbuffer(rotated))
 
     def clear(self) -> None:
         self._epd.Clear()
