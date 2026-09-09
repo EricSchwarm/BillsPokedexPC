@@ -1,14 +1,14 @@
 # Bill's Pokedex PC
 
-Offline Pokedex slideshow for a Raspberry Pi 3B+ with a Waveshare 2.7" e-ink HAT
-(264x176, 1-bit B/W, 4 buttons on BCM 5/6/13/19).
+Offline Pokedex slideshow for a Raspberry Pi 3B+ with a Waveshare 2.7" e-ink HAT,
+mounted in portrait (176x264, 1-bit B/W, 4 buttons on BCM 5/6/13/19).
 
 ## Layout
 
 - `pokedex/db.py`, `pokedex/models.py`, `pokedex/fetch.py` — offline SQLite dataset and its downloader.
 - `pokedex/display/` — `DisplayDriver` interface plus the Waveshare epd2in7 (V1) wrapper (Pi-only; vendored driver in `display/vendor/`).
 - `pokedex/input/` — `ButtonInput` interface plus the gpiozero implementation for the onboard buttons (Pi-only).
-- `pokedex/ui/layout.py` — renders a dex entry to a 264x176 1-bit image.
+- `pokedex/ui/layout.py` — renders a dex entry (or the home screen) to a 176x264 1-bit image, matching the panel's native pixel grid — no rotation needed at draw time.
 - `pokedex/app.py` / `main.py` — state machine and entry point wiring it all together.
 - `systemd/pokedex.service` — autostart unit for the Pi.
 
@@ -48,7 +48,9 @@ Use `--force` to re-fetch everything from scratch.
 
     python main.py
 
-Displays one Pokemon at a time. Buttons (BCM 5/6/13/19, HAT-labeled 1-4):
+Shows a Poke Ball on startup; the first button press dismisses it and shows
+Bulbasaur. From there, displays one Pokemon at a time. Buttons (BCM 5/6/13/19,
+HAT-labeled 1-4):
 
 - **Button 1** — next Pokemon
 - **Button 2** — previous Pokemon

@@ -1,8 +1,9 @@
-"""Renders a Pokemon dex entry to a 264x176 1-bit image for the e-ink display.
+"""Renders a Pokemon dex entry to a 176x264 1-bit image for the e-ink display,
+matching the panel's native portrait pixel grid.
 
 Page layout: name + number centered at the top, the Pokemon's sprite
-centered in the middle, and the brief in-game dex description wrapped at
-the bottom.
+centered below it, and the brief in-game dex description wrapped at the
+bottom.
 """
 
 from PIL import Image, ImageDraw, ImageFont
@@ -11,13 +12,13 @@ from config import DISPLAY_HEIGHT, DISPLAY_WIDTH, EINK_SPRITES_DIR, FONT_PATH, S
 from pokedex.models import Pokemon
 from pokedex.sprite_convert import flatten_to_1bit
 
-ARTWORK_SPRITE_BOX = (80, 80)
-SPRITE_TOP = 24
+ARTWORK_SPRITE_BOX = (120, 120)
+SPRITE_TOP = 26
 BOTTOM_MARGIN = 4
 FOOTER_GAP = 2
-POKEBALL_DIAMETER = 120
+POKEBALL_DIAMETER = 140
 
-_TITLE_FONT = ImageFont.truetype(str(FONT_PATH), 14)
+_TITLE_FONT = ImageFont.truetype(str(FONT_PATH), 12)
 _BODY_FONT = ImageFont.truetype(str(FONT_PATH), 8)
 
 

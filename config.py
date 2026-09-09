@@ -8,9 +8,9 @@ SPRITES_DIR = BASE_DIR / "sprites"
 EINK_SPRITES_DIR = SPRITES_DIR / "eink"
 FONT_PATH = BASE_DIR / "pokedex" / "assets" / "fonts" / "PressStart2P-Regular.ttf"
 
-# Waveshare 2.7" e-ink HAT, landscape orientation.
-DISPLAY_WIDTH = 264
-DISPLAY_HEIGHT = 176
+# Waveshare 2.7" e-ink HAT, native portrait orientation (panel's own pixel grid).
+DISPLAY_WIDTH = 176
+DISPLAY_HEIGHT = 264
 
 # Onboard buttons, BCM numbering: button 1/2/3/4 on the HAT.
 BUTTON_NEXT_PIN = 5
