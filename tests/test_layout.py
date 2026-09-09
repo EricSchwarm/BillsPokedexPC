@@ -38,14 +38,14 @@ def test_load_sprite_prefers_game_specific_sprite_and_upscales_crisply():
     sprite = _load_sprite(1, "red")
 
     assert sprite is not None
-    assert sprite.size == (160, 160)  # native in-game sprite is 40x40, upscaled 4x
+    assert sprite.size == (132, 132)  # 75% of the 176px display width, per GAME_SPRITE_TARGET_WIDTH
 
 
 def test_load_sprite_falls_back_to_official_artwork_when_game_sprite_missing():
     sprite = _load_sprite(1, "nonexistent-version")
 
     assert sprite is not None
-    assert sprite.size[0] <= 160 and sprite.size[1] <= 160
+    assert sprite.size[0] <= 132 and sprite.size[1] <= 132
 
 
 def test_load_sprite_returns_none_when_nothing_available():

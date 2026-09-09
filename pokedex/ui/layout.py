@@ -12,21 +12,22 @@ from config import DISPLAY_HEIGHT, DISPLAY_WIDTH, EINK_SPRITES_DIR, FONT_PATH, S
 from pokedex.models import Pokemon
 from pokedex.sprite_convert import flatten_to_1bit
 
-ARTWORK_SPRITE_BOX = (160, 160)
+ARTWORK_SPRITE_BOX = (132, 132)  # matches GAME_SPRITE_TARGET_WIDTH: 75% of the display width
 SPRITE_TOP = 20  # just clears the 12pt header, which ends around y=16
-BOTTOM_MARGIN = 4
+BOTTOM_MARGIN = 4  # only used when there's no version footer to anchor against
+FOOTER_BOTTOM_MARGIN = 1  # the version tag sits flush at the very bottom of the screen
 FOOTER_GAP = 2
 POKEBALL_DIAMETER = 140
 
-BOX_MARGIN = 4  # horizontal distance from the screen edges to the text box
+BOX_MARGIN = 16  # horizontal distance from the screen edges to the text box
 BOX_PADDING = 4  # distance from the box border to the text inside it
 BOX_BORDER_GAP = 2  # gap between the double border's outer and inner lines
 
 _TITLE_FONT = ImageFont.truetype(str(FONT_PATH), 12)
-# 6pt rather than 8pt: verified against every stored flavor text that this is
+# 7pt rather than 8pt: verified against every stored flavor text that this is
 # the largest size that never overlaps the sprite at its current size/position
-# for the longest entries (worst case needs 5 wrapped lines at this width).
-_BODY_FONT = ImageFont.truetype(str(FONT_PATH), 6)
+# for the longest entries.
+_BODY_FONT = ImageFont.truetype(str(FONT_PATH), 7)
 
 
 def render_entry(pokemon: Pokemon, flavor_text: str, version: str) -> Image.Image:
@@ -43,9 +44,10 @@ def render_entry(pokemon: Pokemon, flavor_text: str, version: str) -> Image.Imag
         image.paste(sprite, (x, SPRITE_TOP))
 
     footer_height = _line_height(draw, _BODY_FONT) if version else 0
-    box_bottom = DISPLAY_HEIGHT - BOTTOM_MARGIN
     if version:
-        box_bottom -= footer_height + FOOTER_GAP
+        box_bottom = DISPLAY_HEIGHT - FOOTER_BOTTOM_MARGIN - footer_height - FOOTER_GAP
+    else:
+        box_bottom = DISPLAY_HEIGHT - BOTTOM_MARGIN
 
     text_max_width = DISPLAY_WIDTH - 2 * (BOX_MARGIN + BOX_PADDING)
     lines = _wrap_lines(draw, flavor_text, text_max_width, _BODY_FONT)
@@ -54,7 +56,7 @@ def render_entry(pokemon: Pokemon, flavor_text: str, version: str) -> Image.Imag
     if version:
         label = f"{version.upper()} VERSION"
         label_width = draw.textlength(label, font=_BODY_FONT)
-        draw.text(((DISPLAY_WIDTH - label_width) / 2, DISPLAY_HEIGHT - BOTTOM_MARGIN - footer_height), label, font=_BODY_FONT, fill=0)
+        draw.text(((DISPLAY_WIDTH - label_width) / 2, DISPLAY_HEIGHT - FOOTER_BOTTOM_MARGIN - footer_height), label, font=_BODY_FONT, fill=0)
 
     return image
 

@@ -2,11 +2,14 @@
 
 from PIL import Image
 
-GAME_SPRITE_SCALE = 4  # native in-game sprites are 40x40; nearest-neighbor upscale keeps pixel art crisp
+from config import DISPLAY_WIDTH
+
+GAME_SPRITE_TARGET_WIDTH = round(0.75 * DISPLAY_WIDTH)  # sprite width as a fraction of the display
 
 
 def upscale_game_sprite(sprite: Image.Image) -> Image.Image:
-    size = (sprite.width * GAME_SPRITE_SCALE, sprite.height * GAME_SPRITE_SCALE)
+    scale = GAME_SPRITE_TARGET_WIDTH / sprite.width
+    size = (round(sprite.width * scale), round(sprite.height * scale))
     return sprite.resize(size, Image.NEAREST)
 
 
